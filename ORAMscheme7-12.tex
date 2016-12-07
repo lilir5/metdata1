@@ -1,0 +1,113 @@
+\title{Publicly Verifiable Distributed ORAM with application in Metadata}
+\author{
+	Leyla Roohi\\
+	Departement of Computing and Information System\\
+	University of Melbourne\\
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+%\documentclass[11pt,letter]{article}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+
+\begin{document}
+	\maketitle
+%	\begin{abstract}
+%As we move through the modern world many of our actions leave behind an electronic footprint; such as internet of things and calling someone through mobile phone. This information called meta data or data about data and who collects that data and what they do with it have become critical questions for modern society. Australia's new data retention laws mean phone and internet companies have to save this information for two years and government can use this data for conducting criminal and financial investigations as well.  
+%This project is an investigation of secure privacy-preserving storage and querying of telecommunications meta data. The main challenges of the project are: first, how to store large volumes of meta data securely in such a way that if an attacker breaks one node cannot obtain a lot of data? and second: law enforcement who can make meaningful queries can get only answer to their specific query without  leakage of extra information.
+	
+	 
+%In this thesis, we present related literature review about secure data storage, private query and also talk about the objectives and goal of the project. We also propose graph secret sharing as a solution to secure data structure while making neighbourhood and next -hop queries privately.
+	
+	%\end{abstract}
+	
+	%\section{Introduction}
+	
+%Today, a large amount of data is produced by different users and systems via internet of the things. This information varies from our contact numbers to places we have been or IP addresses of the sites we have visited. This information is retained by companies who provide network based services ( such as Australia's Telstra, Vodafone and Optus). Moreover, many other companies use this data for conducting criminal and financial investigations as well. Hence, privacy of data can be compromised in two phases in this paradigm, first when the data is stored by network based companies and at the second phase when computation is done by other parties. Although this paradigm needs privacy in both aspects, the efficient data retreiving and computing are required as well. Many studies have been done separately, for preserving privacy of storages and computation while they act efficiently regarding to communication complexity. 
+\\
+%Distributed Data Storage (DDS) emerged as a solution to the scalable and private storage .DDS disperses data through the set of nodes instead of storing the whole data in one node and it provides the level of security to the system. There is, if an adversary attacks to a node can obtain either very small amount of data or nothing. Network coding is one of the key elements of DDS that plays an important role to acceptable security and efficient data retrieving \cite{rashmi2012regenerating},\cite{shamir1979share}. 
+\\
+%Although DDS as a cloud storage is a solution for many companies, many others need to do computation on stored data as well. Cloud Computation on data varies from DNA matching and private data mining to making a query from databases and structured data. The main concerns in cloud computing are untrusted third party and communication and computation overhead. Many works have been done on privacy- preserving computation such as homomorphic encryption \cite{gentry2009fully}  and multi-party computation \cite{yao1982protocols}  that need heavy computation and have communication overhead. Although in some complicated scenarios- such as event correlation and network statistical protocol- multi-party computation seems as a good solution, in less complicated scenarios –such as private data queries from databases and structured data- seems less efficient.
+   \section{Metadata Storage Structure}
+The main goal of the project is to store telecommunication metadata in the public cloud securely and give permission to legitimate users to make restricted query from stored data such as neighbourhood query and next hop query.\\
+In order to achieve the secure storage not only the privacy of the data should be considered but also the access pattern is very important security disclosure. Therefore, we consider a storage model that can address both problems. Each telephone number and its neighbours are assumed as a block of data and with leverage of secret sharing, we provide privacy. We also store opening of the commitments of the data along with shares. The commitments are also kept in public cloud and for each block of data if we say A is the telephone number and neighbours are B,C and D the commitment is $g^r* h^A*h_1^B*h_2^C*h_3^D$. In order to avoid access pattern disclosure we use path ORAM on shares and commitments.
+
+
+      \section{Commitments Structure}
+The main reason of using commitments is to prove that the telecommunication company cannot modify or change the data after storing it. But part of the commitments is changing after each query, because of the ORAM structure. In Path ORAM structure, after each accesses to the storage all buckets along the read path decrypt and re-encrypt when pushing to the new path. 
+
+ In order to overcome this problem, we don’t modify the commitments along the read path and just re-randomize them and write them in the same path. In this way, we can use proof of the shuffle to show that Telco haven’t changed anything after committing. But this scheme cannot avoid cheating before committing, it means that Telco can easily generate two commitments on each block of the data (telephone number and its neighbours) and store it in the ORAM structure and use proof of the shuffle that show nothing has changed.
+
+
+
+
+\section{Merkle Tree Structure}
+We use Merkle tree to avoid publishing all the commitments in public and checking them after each query to ensure that apart the set of the commitments that we re-randomized them nothing has changed on commitments.
+
+Telco store the ORAM tree of the commitments as a Merkle tree as well. It means the buckets in the ORAM tree are contained commitments and hash of the children commitment with commitment of the bucket.  After each query, a new root hash of the Merkle tree is published and sent to the legitimate users then she can check that the Merkle tree before query and after query are equivalent and hasn’t changed.
+
+If we assume that $C=\left\{c_1,c_2,...,c_n\right\}$ is the set of the commitments in the read path of the ORAM tree and $C’:=\left\{ c'_1,c'_2,c'_3,...,c'_n\right\}$ is the set of the commitments after re- randomizations, $h_1$ and $h_2$ are the hash of the untouched parts in the Merkle tree and $H$ is the root hash before query and $H'$ is root hash after query  then it is enough to show that:
+\begin{enumerate}
+\item The commitment of queried block is in the $C$.
+\item $C$ and $h_1$ and $h_2$ results $H$.
+\item $C'$ and $h_1$ and $h_2$ result $H'$
+
+\end{enumerate}
+In order to achieve proof of the shuffle we need to publish C and C’ after each re-randomization of the ORAM path. Therefore the protocol for covering the three mentioned steps is as following:
+\begin{enumerate}
+\item 	Publishing $C$, $C'$ and permutation commitment (depends to the proof of the shuffle we choose).
+\item	Sending $C$, $h_1$ and $h_2$ to the legitimate users in order to verify and recompute the $H$.
+\item	In order to hide the level of the queried block, we need to do re-randomization and proof of the shuffle again. Therefore we need to publish $C'$and $C''$ which are two sets after re-randomization.
+\item	Sending $C''$, $h_1$ and $h_2$ to the legitimate user in order to recompute and verify the $H'$. 
+
+
+\end{enumerate}
+
+\subsection{Stash Structure}
+In ORAM structure, stash stores the blocks which are overflowed from the buckets. In path ORAM structure, this would happen when the queried block is either elevated or descended through the old path in order to set in the new path. Therefore, in this repositioning of the queried block the stash could store the block which cannot find empty bucket through the old path in desired level of ORAM tree. 
+
+ In this scheme, the stash could have some queried buckets of the commitments from $C''$. So the stash should be published in public as a part of $C''$ in order to perform the proof of shuffle hence the commitments in the stash re-randomize along with commitments in the accessed path in path-ORAM structure.  To show the integrity of the commitments in the Merkle tree, the commitments in the stash should be included in $C$, $C''$ and the root hash which is sent to the legitimate user.  
+
+	\subsection{Directedness of the graph}
+	Start by assuming that all edges are directed and that $g^r* h^A*h_1^B*h_2^C*h_3^D$ represents A calling B, C and D.  Then we can ask the second-hop query of who was called by someone whom A called.
+	Other kinds of second-hop query are harder in this data structure, for example who called someone whom A also called.  We considered some options for including the list of people who called A.\\
+	Option 1: uncommitted crib notes.  Note that this does not need to be committed to, assuming that the final proof is based on the main data structure.  It does need to be remembered by the data owner.  One possibility is to secret-share this information – when A calls B, that fact is recorded in the main data structure record representing A’s calls, and also included in a “crib notes” form that Telstra uses to answer reverse connection queries.  The “crib notes” could be secret-shared directly among the cloud authorities.  When the Telco wants to know who called #A, it retrieves the secret-shared data and then the relevant commitments for each of the calling parties.
+	Question: how do we stop it from returning only a subset of the true answer?\\
+	Option 2: Committed list of incoming calls.  This gets rid of the question of leaving out some subset – just use the same mixing proof as for outgoing calls.  
+	Questions: how do we ensure consistency with the outgoing call commitments?  Do we need to?
+	
+	
+	   
+	
+	\subsection{Second-hop Query }
+The graph we are working on is a directed graph as the Telco just keeps the metadata which is related to the outgoing calls for billing purposes. Therefore, if we assume the neighbours of A are X and Y and neighbours of X are $X_1$ and $X_2$ and neighbours of Y are $Y_1$ and $Y_2$ then related commitments for second-hop query are as following:\\
+$C_A=g^{r_a}*h^A*h_1^X*h_2*^Y$\\
+$C_X=g^{r_x}*h^X*h_1^{X_1}*h_2^{X_2}$\\
+$C_Y=g^{r_y}*h^Y*h_1^{Y_1}*h_2^{Y_2}$\\
+Telco sends the $X_1$,$X_2$,$Y_1$ and $Y_2$ as the second-hop neighbours of the A to the querier and needs to prove that the answer of the query is correct and untouched. 
+In order to prove the correctness and integrity of the answer, Telco needs to show: \\
+step 1- $C_A$, $C_X$ and $C_Y$ are in the Merkle tree\\
+ Step 2- $C_A$, $C_X$ and $C_Y$ are related by using known elements of $X_1$,$ X_2$, $Y_1$ and $Y_2$ without revealing X and Y.\\
+ To show the CA, CX and CY is in the Merkle tree, Telco should follow the Protocol which described for neighbourhood query, in section one. To show the second part, Telco should use Zero-knowledge proof to show CA, CX and CY are related and are correct commitments of A, X and Y without reviling anything about neighbours of A which are X and Y. Therefore, Telco needs to prove that it knows the X,Y, $r_a$, $r_x$ and $r_Y$ for recomputing the $C_A$, $C_X$ and $C_Y$.
+ we use Zero-knowledge proof scheme to show that Telco knows the entire secret to recompute the commitments. If we assume $X'$,$Y'$, $r'_a$, $r'_X$ and $r'_Y$ are random values which are generated randomly by Telco and $e$ is a challenge generated  by querier then following steps are needed to show the step 2:\\
+ \begin{enumerate}
+ \item	Telco sends \\
+ $C'_A= g^{r’_a} *h_1^X'*h_2^Y'$\\
+  $C'_X =g^{r'_x}*h^X'$\\
+  $C'_Y = g^{r''_y}*h^Y'$
+  \item	Querier sends challenge $e$ to the Telco
+  \item Telco sends $fX=X'+e*X$ , $fY=Y'+e*Y$ , $fr_a=r'_a+e*r_a$ ,$fr_x=r'_x+e*rx$, $fr_Y=r’Y+e*r'_Y$ to the querier.
+  \item 	For proof of the step 2 , querier needs to show: \\
+ $ g^{fr_a}* h_1^{fX}* h_2^{fY} == C'_A*(C_A/h^A)^e$\\\\
+  $g^{fr_x}*h^{fX}== C'_X*(C_X/h_1^{X_1}*{h_2}^{X_2})^e$\\\\
+  $g^{fr_Y}*h^{f_Y}==C'_Y*(C_Y/h_1^{Y_1}*h_2^{Y_2})^e$
+ \end{enumerate}
+ 
+ 
+ 	\bibliographystyle{alpha}
+	%\bibliography{MyCitation}
+\end{document}
+
+
+This is never printed
